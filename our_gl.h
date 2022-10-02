@@ -9,7 +9,7 @@
 #include <optional>
 #include <array>
 
-//¹âÕÕÊôĞÔ
+//å…‰ç…§å±æ€§
 struct Light{
 	vec3 position;
 	vec3 direction;
@@ -20,7 +20,7 @@ struct Light{
 	vec3 specular;
 };
 
-//²ÄÖÊÊôĞÔ
+//æè´¨å±æ€§
 struct Material {
 	vec3 ambient;
 	vec3 diffuse;
