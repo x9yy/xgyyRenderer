@@ -9,7 +9,7 @@
 #include <optional>
 #include <array>
 
-//å…‰ç…§å±æ€§
+//¹âÕÕÊôĞÔ
 struct Light{
 	vec3 position;
 	vec3 direction;
@@ -20,7 +20,7 @@ struct Light{
 	vec3 specular;
 };
 
-//æè´¨å±æ€§
+//²ÄÖÊÊôĞÔ
 struct Material {
 	vec3 ambient;
 	vec3 diffuse;
@@ -79,5 +79,11 @@ T interpolate(float alpha, float beta, float gamma, T vert1, T vert2, T vert3, f
 void line(int x0, int x1, int y0, int y1, TGAImage& image, const TGAColor& color);
 
 void triangle(std::array<vec4,3> v,Shader& shader,float* zbuffer,TGAImage& image);
+
+void ssaa_triangle(std::array<vec4, 3> v, Shader& shader, float* zbuffer, TGAImage& image, float** ssaa_zbuffer, vec3** ssaa_framebuffer);
+
+TGAColor getColorBilinear(TGAImage& texture, vec2 uv);
+
+vec3 rand_point_on_unit_sphere();
 
 #endif // !OUR_GL_H

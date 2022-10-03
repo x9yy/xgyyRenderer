@@ -212,6 +212,76 @@ public:
 	}
 };
 
+//双线性插值
+class BilinearTextureShader:public Shader {
+public:
+	TGAImage texture;
+	mat<4, 4> projection;
+	mat<4, 4> viewport;
+	mat<4, 4> lookat;
+	mat<4, 4> model;
+	std::array<vec4, 3> coords;
+	std::array<vec2, 3> uvs;
 
+	TGAColor sample2D(TGAImage& img, vec2& uvf) {
+		//return img.get(uvf[0] * img.width(), uvf[1] * img.height());
+		return getColorBilinear(img, uvf);
+	}
+
+	std::array<vec4, 3> vertex(std::array<vec3, 3> world_coords) {
+		std::array<vec4, 3> res;
+		for (int i = 0; i < 3; i++) {
+			coords[i] = model * embed<4>(world_coords[i], 1);
+			res[i] = Homogenization(viewport * projection * lookat * model * embed<4>(world_coords[i], 1));
+		}
+		return res;
+	}
+
+	std::optional<TGAColor> fragment(vec3 bar) {
+		vec2 uv = uvs[0] * bar[0] + uvs[1] * bar[1] + uvs[2] * bar[2];
+		return sample2D(texture, uv);
+	}
+};
+
+//全局光照
+class OcclusionShader :public Shader {
+public:
+private:
+	std::array<vec4, 3> deepth_coords;
+public:
+	mat<4, 4> projection;
+	mat<4, 4> viewport;
+	mat<4, 4> lookat;
+	mat<4, 4> model;
+	mat<4, 4> deepth_matrix;
+	std::array<vec2, 3> uvs;
+	float* shadow_buffer;
+	vec2 dim;
+	TGAImage occl;
+
+	std::array<vec4, 3> vertex(std::array<vec3, 3> world_coords) {
+		std::array<vec4, 3> res;
+		for (int i = 0; i < 3; i++) {
+			deepth_coords[i] = Homogenization(deepth_matrix * embed<4>(world_coords[i], 1));
+			deepth_coords[i].z = deepth_coords[i].z * deepth_coords[i].w;
+			res[i] = Homogenization(viewport * projection * lookat * model * embed<4>(world_coords[i], 1));
+		}
+		return res;
+	}
+
+	std::optional<TGAColor> fragment(vec3 bar) {
+		vec2 uv = uvs[0] * bar[0] + uvs[1] * bar[1] + uvs[2] * bar[2];
+		float z_interpolated = deepth_coords[0].z * bar[0] + deepth_coords[1].z * bar[1] + deepth_coords[2].z * bar[2];
+		vec3 ori_bar;
+		for (int i = 0; i < 3; i++) ori_bar[i] = (bar[i] / z_interpolated) * deepth_coords[i].z;
+		vec3 point = proj<3>(deepth_coords[0] * ori_bar[0] + deepth_coords[1] * ori_bar[1] + deepth_coords[2] * ori_bar[2]);
+		int idx = int(point.x) + int(point.y) * int(dim.x);
+		if (idx >= 0 && idx <= dim.x * dim.y - 1 && shadow_buffer[idx] < z_interpolated + 0.08) {
+			occl.set(uv.x * dim.x, uv.y * dim.y, TGAColor(255, 255, 255, 255));
+		}
+		return std::nullopt;
+	}
+	
+};
 
 #endif // !SHADER_H

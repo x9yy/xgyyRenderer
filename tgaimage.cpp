@@ -237,4 +237,8 @@ int TGAImage::height() const {
     return h;
 }
 
+void TGAImage::clear() {
+    std::fill(data.begin(), data.end(), 0);
+}
+
 

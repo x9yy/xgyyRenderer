@@ -45,6 +45,7 @@ struct TGAImage {
     void set(const int x, const int y, const TGAColor &c);
     int width()  const;
     int height() const;
+    void clear();
 private:
     bool   load_rle_data(std::ifstream &in);
     bool unload_rle_data(std::ofstream &out) const;
