@@ -1,5 +1,5 @@
 # xgyyRnderer
-简单的c++软件渲染器
+简明c++软件渲染器
 
 ## 冯氏光照
 ![光照](https://user-images.githubusercontent.com/112044757/193453397-ff74ae2c-3949-470d-bfbd-3c0272729aa0.png)
